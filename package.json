@@ -1,0 +1,21 @@
+{
+  "name": "cf-network-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "零成本 Cloudflare 免费层多地区网络连通性测试与监控系统",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:migrate:local": "wrangler d1 migrations apply monitor_db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply monitor_db --remote",
+    "pages:deploy": "wrangler pages deploy src/dashboard/public --project-name=cf-network-monitor-dashboard"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250101.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.80.0"
+  }
+}

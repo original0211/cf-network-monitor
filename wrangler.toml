@@ -1,0 +1,32 @@
+name = "cf-network-monitor-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ---- 自定义域名路由（在 dashboard.md 部署阶段绑定域名后）----
+# routes = [
+#   { pattern = "api.brodydung.eu.org/*", zone_name = "brodydung.eu.org" }
+# ]
+
+# ---- D1 数据库绑定（实施阶段创建后回填 database_id）----
+[[d1_databases]]
+binding = "DB"
+database_name = "monitor_db"
+database_id = "REPLACE_AFTER_WRANGLER_D1_CREATE"
+
+# ---- KV 命名空间绑定（存当前节点状态缓存）----
+[[kv_namespaces]]
+binding = "STATUS_KV"
+id = "REPLACE_AFTER_WRANGLER_KV_CREATE"
+
+# ---- Cron 定时探测任务（免费层每账户 Cron Triggers 数量有限，具体以实际 Dashboard 为准）----
+[triggers]
+crons = ["*/10 * * * *"]
+
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://www.brodydung.eu.org,https://status.brodydung.eu.org"
+
+# 以下为敏感变量，不要写在 wrangler.toml 里，用 `wrangler secret put` 注入：
+# ADMIN_TOKEN            后台管理鉴权 Token
+# RIPE_ATLAS_API_KEY     RIPE Atlas API Key（用于真实多国测量）
