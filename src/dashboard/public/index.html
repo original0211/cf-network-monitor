@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>cf-network-monitor 监控面板</title>
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header>
+    <h1>全球网络连通性监控</h1>
+    <div class="controls">
+      <label>API 地址：<input id="apiBase" type="text" value="https://api.brodydung.eu.org" /></label>
+      <label>管理 Token（仅手动测速需要，不会保存）：<input id="adminToken" type="password" /></label>
+      <label><input id="autoRefresh" type="checkbox" checked /> 自动刷新（10s）</label>
+      <button id="manualProbeBtn">手动测速</button>
+      <select id="sortSelect">
+        <option value="score">按综合评分排序</option>
+        <option value="latency">按延迟排序</option>
+        <option value="availability">按可用率排序</option>
+      </select>
+    </div>
+    <p id="lastUpdated"></p>
+  </header>
+
+  <main>
+    <table id="nodeTable">
+      <thead>
+        <tr>
+          <th>名称</th>
+          <th>标签</th>
+          <th>平均延迟</th>
+          <th>可用率</th>
+          <th>状态</th>
+          <th>NodeScore</th>
+          <th>最近检查</th>
+        </tr>
+      </thead>
+      <tbody id="nodeTableBody"></tbody>
+    </table>
+    <p class="note">
+      说明：本面板展示的是本项目自有目标的健康度数据。“标签”为目标的描述信息，不代表 Cloudflare 出口所在国家。
+      真实的多国网络测量数据来自 RIPE Atlas，请在 /api/history 接口查看详细记录。
+    </p>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

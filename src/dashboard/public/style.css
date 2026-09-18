@@ -1,0 +1,87 @@
+/* src/dashboard/public/style.css */
+:root {
+  --bg: #0f1117;
+  --card-bg: #171a23;
+  --text: #e6e8ee;
+  --muted: #8b90a0;
+  --online: #35d07f;
+  --degraded: #f5a623;
+  --offline: #ef4444;
+  --border: #2a2e3a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 24px;
+}
+
+header h1 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.controls input[type="text"],
+.controls input[type="password"] {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+button, select {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+th { color: var(--muted); font-weight: 600; }
+
+.status-online { color: var(--online); font-weight: 600; }
+.status-degraded { color: var(--degraded); font-weight: 600; }
+.status-offline { color: var(--offline); font-weight: 600; }
+.status-unknown { color: var(--muted); }
+
+.note {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+#lastUpdated {
+  color: var(--muted);
+  font-size: 12px;
+}
