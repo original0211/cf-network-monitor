@@ -4,8 +4,9 @@
 //
 // 重要说明：
 // 1. RIPE Atlas 提供的是真实分布在各国的探针（probe），测量结果是真实数据。
-// 2. 发起一次测量会消耗账户信用点（credits），免费额度有限，不在代码里硬编码具体数字，由调用方根据自己账户信用点余额控制频率。
-// 3. 本服务只负责对接 API，不做任意目标转发，只能对 D1 targets 白名单中的 URL 发起测量。
+// 2. 发起一次测量（createPingMeasurement）会消耗账户信用点，免费额度有限，不在代码里硬编码具体数字，由调用方自行控制频率。
+// 3. 拉取结果（fetchMeasurementResults / getProbeCountry）都是 GET 请求，不消耗信用点。
+// 4. 本服务只负责对接 RIPE Atlas API，不做任意目标转发，只能对 D1 targets 白名单中的 URL 对应的主机名发起测量。
 
 import type { RipeMeasurementResult, SupportedRegionCode } from '../types';
 import { logger } from '../utils/logger';
@@ -77,11 +78,36 @@ interface RipeResultItem {
   rcvd?: number;
 }
 
+interface RipeProbeInfo {
+  id: number;
+  country_code?: string;
+}
+
+const probeCountryCache = new Map<number, string>();
+
+export async function getProbeCountry(apiKey: string, probeId: number): Promise<string> {
+  const cached = probeCountryCache.get(probeId);
+  if (cached) return cached;
+
+  try {
+    const resp = await fetch(`${RIPE_API_BASE}/probes/${probeId}/`, {
+      headers: { authorization: `Key ${apiKey}` },
+    });
+    if (!resp.ok) return 'UNKNOWN';
+    const info = (await resp.json()) as RipeProbeInfo;
+    const country = info.country_code ?? 'UNKNOWN';
+    probeCountryCache.set(probeId, country);
+    return country;
+  } catch (err) {
+    logger.warn('ripe_probe_lookup_failed', { probeId, error: String(err) });
+    return 'UNKNOWN';
+  }
+}
+
 export async function fetchMeasurementResults(
   apiKey: string,
   measurementId: number,
-  targetId: string,
-  probeCountryLookup: Map<number, string>
+  targetId: string
 ): Promise<RipeMeasurementResult[]> {
   const resp = await fetch(
     `${RIPE_API_BASE}/measurements/${measurementId}/results/?format=json`,
@@ -95,18 +121,21 @@ export async function fetchMeasurementResults(
 
   const items = (await resp.json()) as RipeResultItem[];
 
-  return items.map((item) => {
+  const results: RipeMeasurementResult[] = [];
+  for (const item of items) {
     const sent = item.sent ?? 0;
     const rcvd = item.rcvd ?? 0;
     const packetLoss = sent > 0 ? ((sent - rcvd) / sent) * 100 : 100;
-    return {
+    const country = await getProbeCountry(apiKey, item.prb_id);
+    results.push({
       target_id: targetId,
       measurement_id: measurementId,
-      probe_country: probeCountryLookup.get(item.prb_id) ?? 'UNKNOWN',
+      probe_country: country,
       probe_id: item.prb_id,
       rtt_ms: item.avg ?? null,
       packet_loss_pct: packetLoss,
       success: rcvd > 0,
-    };
-  });
+    });
+  }
+  return results;
 }

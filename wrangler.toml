@@ -19,13 +19,14 @@ database_id = "60dd910c-2f81-498f-88a2-33ba47f10861"
 binding = "STATUS_KV"
 id = "f355585adeb549cc93451a3f5efc6dd1"
 
-# ---- Cron 定时探测任务（免费层每账户 Cron Triggers 数量有限，具体以实际 Dashboard 为准）----
+# ---- Cron 定时任务（免费层每账户 Cron Triggers 数量有限，具体以实际 Dashboard 为准）----
+# 1) */10 * * * *  本地 HTTP 探测（免费，频率高）
+# 2) */30 * * * *  拉取 RIPE Atlas 已发起测量的结果（只是 GET，不消耗信用点，但不会主动发起新测量，新测量必须通过 /api/ripe/run 手动触发）
 [triggers]
-crons = ["*/10 * * * *"]
+crons = ["*/10 * * * *", "*/30 * * * *"]
 
 [vars]
 ENVIRONMENT = "production"
-# 包含 Pages 默认域名（当前 Dashboard 实际运行位置）以及未来的自定义域名
 ALLOWED_ORIGINS = "https://cf-network-monitor-dashboard.pages.dev,https://www.brodydung.eu.org,https://monitor.brodydung.eu.org,https://status.brodydung.eu.org"
 
 # 以下为敏感变量，不要写在 wrangler.toml 里，用 `wrangler secret put` 注入：

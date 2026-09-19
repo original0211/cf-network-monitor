@@ -6,11 +6,16 @@ import { buildCorsHeaders, errorResponse } from './utils/response';
 import { handlePing, handleManualProbe } from './api/probe';
 import { handleListTargets, handleCreateTarget, handleDeleteTarget } from './api/targets';
 import { handleHistory } from './api/history';
+import { handleRipeRun, handleRipeHistory } from './api/ripe';
 import { listTargets } from './services/targets.service';
 import { probeAllTargets } from './services/probe.service';
 import { recordProbeResult } from './services/state.service';
+import { collectPendingRipeMeasurements } from './services/ripe-collector.service';
 import { logger } from './utils/logger';
 import { assertNoRawUrlParam } from './utils/ssrf-guard';
+
+const LOCAL_PROBE_CRON = '*/10 * * * *';
+const RIPE_COLLECT_CRON = '*/30 * * * *';
 
 function withCors(response: Response, origin: string | null, allowedOrigins: string): Response {
   const corsHeaders = buildCorsHeaders(origin, allowedOrigins);
@@ -52,6 +57,10 @@ export default {
         response = await handleDeleteTarget(request, env, id);
       } else if (url.pathname === '/api/history' && request.method === 'GET') {
         response = await handleHistory(request, env);
+      } else if (url.pathname === '/api/ripe/run' && request.method === 'POST') {
+        response = await handleRipeRun(request, env);
+      } else if (url.pathname === '/api/ripe/history' && request.method === 'GET') {
+        response = await handleRipeHistory(request, env);
       } else if (url.pathname === '/healthz') {
         response = new Response('ok', { status: 200 });
       } else {
@@ -65,8 +74,15 @@ export default {
     }
   },
 
-  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    logger.info('cron_probe_started');
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    if (event.cron === RIPE_COLLECT_CRON) {
+      logger.info('cron_ripe_collect_started');
+      const count = await collectPendingRipeMeasurements(env);
+      logger.info('cron_ripe_collect_finished', { collected: count });
+      return;
+    }
+
+    logger.info('cron_probe_started', { cron: event.cron });
     const targets = await listTargets(env, true);
     const results = await probeAllTargets(targets);
     await Promise.all(results.map((r) => recordProbeResult(env, r)));
