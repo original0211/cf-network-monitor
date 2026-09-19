@@ -25,7 +25,8 @@ crons = ["*/10 * * * *"]
 
 [vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGINS = "https://www.brodydung.eu.org,https://status.brodydung.eu.org"
+# 包含 Pages 默认域名（当前 Dashboard 实际运行位置）以及未来的自定义域名
+ALLOWED_ORIGINS = "https://cf-network-monitor-dashboard.pages.dev,https://www.brodydung.eu.org,https://monitor.brodydung.eu.org,https://status.brodydung.eu.org"
 
 # 以下为敏感变量，不要写在 wrangler.toml 里，用 `wrangler secret put` 注入：
 # ADMIN_TOKEN            后台管理鉴权 Token
