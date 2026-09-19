@@ -3,21 +3,21 @@ main = "src/index.ts"
 compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
-# ---- 自定义域名路由（在 dashboard.md 部署阶段绑定域名后）----
+# ---- 自定义域名路由（绑定域名后取消注释）----
 # routes = [
 #   { pattern = "api.brodydung.eu.org/*", zone_name = "brodydung.eu.org" }
 # ]
 
-# ---- D1 数据库绑定（实施阶段创建后回填 database_id）----
+# ---- D1 数据库绑定（真实 ID，已回填）----
 [[d1_databases]]
 binding = "DB"
 database_name = "monitor_db"
-database_id = "REPLACE_AFTER_WRANGLER_D1_CREATE"
+database_id = "60dd910c-2f81-498f-88a2-33ba47f10861"
 
-# ---- KV 命名空间绑定（存当前节点状态缓存）----
+# ---- KV 命名空间绑定（真实 ID，已回填）----
 [[kv_namespaces]]
 binding = "STATUS_KV"
-id = "REPLACE_AFTER_WRANGLER_KV_CREATE"
+id = "f355585adeb549cc93451a3f5efc6dd1"
 
 # ---- Cron 定时探测任务（免费层每账户 Cron Triggers 数量有限，具体以实际 Dashboard 为准）----
 [triggers]
